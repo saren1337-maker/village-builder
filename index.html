@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Village Builder</title>
+<style>
+:root{font-family:system-ui,sans-serif;color:#f5f6ed;background:#172b24}*{box-sizing:border-box}body{margin:0}main{max-width:650px;margin:auto;padding:18px 14px 40px}h1{margin:6px 0;font-size:1.7rem}p{color:#cbd9ce}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:16px 0}.stat,.panel{background:#274337;border:1px solid #476657;border-radius:14px;padding:12px}.stat strong{display:block;font-size:1.35rem}.stat span{font-size:.86rem;color:#d5e6d8}.scene{height:190px;border-radius:18px;background:linear-gradient(#8ac5b7 0 46%,#73a765 46%);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;padding:18px;gap:6px;font-size:2.3rem}.scene:before{content:'☀️';position:absolute;top:12px;right:20px;font-size:2rem}.scene span{z-index:1;filter:drop-shadow(0 3px 2px #426d46)}h2{font-size:1.12rem;margin:18px 0 10px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}button{background:#d7aa5c;color:#202d22;border:0;border-radius:12px;padding:15px 10px;font-weight:800;font-size:1rem;touch-action:manipulation}button:active{transform:scale(.98)}button:disabled{opacity:.45}.wide{grid-column:span 2;background:#b8dba7}.small{font-size:.84rem;display:block;margin-top:5px;font-weight:500}.notice{min-height:50px;margin-top:12px;color:#f4e3b6}.foot{margin-top:20px;font-size:.82rem;color:#cbd9ce}
+</style>
+</head>
+<body><main>
+<h1>🏡 Village Builder</h1><p>Build a tiny settlement, one tap at a time.</p>
+<div class="stats"><div class="stat"><strong id="wood">0</strong><span>🪵 Wood</span></div><div class="stat"><strong id="stone">0</strong><span>🪨 Stone</span></div><div class="stat"><strong id="houses">0</strong><span>🏠 Houses</span></div><div class="stat"><strong id="people">0</strong><span>👥 Villagers</span></div></div>
+<div class="scene" id="scene" aria-label="Your village"></div>
+<h2>Gather resources</h2><div class="actions"><button id="gatherWood">🌲 Chop Wood<span class="small">+1 wood</span></button><button id="gatherStone">⛏️ Mine Stone<span class="small">+1 stone</span></button></div>
+<h2>Build your village</h2><div class="actions"><button class="wide" id="build">🏠 Build House<span class="small">Costs 5 wood + 3 stone · Adds 2 villagers</span></button></div>
+<div class="panel notice" id="notice" role="status">Welcome, village chief! Gather resources to build your first house.</div>
+<div class="foot">💾 Your progress saves automatically on this device and browser. Clearing browser storage may erase it.</div>
+</main><script>
+const key='village-builder-v1';
+let state={wood:0,stone:0,houses:0};
+try{const saved=JSON.parse(localStorage.getItem(key));if(saved&&['wood','stone','houses'].every(k=>Number.isSafeInteger(saved[k])&&saved[k]>=0))state=saved;}catch(e){}
+const $=id=>document.getElementById(id);
+function render(){
+$('wood').textContent=state.wood;$('stone').textContent=state.stone;$('houses').textContent=state.houses;$('people').textContent=state.houses*2;
+$('build').disabled=state.wood<5||state.stone<3;
+$('scene').replaceChildren();
+const icons=state.houses?Array(Math.min(state.houses,12)).fill('🏠'):['🌲','🌳','🌲'];
+icons.forEach(emoji=>{const el=document.createElement('span');el.textContent=emoji;$('scene').append(el)});
+try{localStorage.setItem(key,JSON.stringify(state));}catch(e){$('notice').textContent='Storage unavailable: progress may not save.';}
+}
+function say(s){$('notice').textContent=s}
+$('gatherWood').onclick=()=>{state.wood++;say('You collected wood! 🪵');render()};
+$('gatherStone').onclick=()=>{state.stone++;say('You collected stone! 🪨');render()};
+$('build').onclick=()=>{if(state.wood<5||state.stone<3)return;state.wood-=5;state.stone-=3;state.houses++;say('New house built! Two villagers moved in. 🎉');render()};
+render();
+</script></body></html>
